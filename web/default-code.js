@@ -1,12 +1,10 @@
-/*
-	UP = 0
-	RIGHT = 1
-	DOWN = 2
-	LEFT = 3
-*/
+const UP = 0;
+const RIGHT = 1;
+const DOWN = 2;
+const LEFT = 3;
 
 return function onTick(field) {
+	// TODO: your code here
 
-
-	return 2;
+	return UP;
 };

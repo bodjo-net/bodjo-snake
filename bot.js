@@ -142,11 +142,126 @@ const RIGHT = 1;
 const DOWN = 2;
 const LEFT = 3;
 
+function matrix(width, height, def) {
+    return Array.from({length:height},()=>Array.from({length:width},()=>def))
+}
+function move(o, d, field) {
+    let x = o.x, y = o.y;
+	switch (d) {
+		case UP:
+			if (y <= 0) return {x, y: field.height - 1};
+			return {x, y: y - 1};
+		case LEFT:
+			if (x <= 0) return {x: field.width - 1, y};
+			return {x: x - 1, y};
+		case DOWN:
+			if (y >= field.height-1) return {x, y: 0};
+			return {x, y: y + 1};
+		case RIGHT:
+			if (x >= field.width-1) return {x: 0, y};
+			return {x: x + 1, y};
+		default:
+			return {x, y};
+	}
+}
+function can(field, x, y) {
+    return (field.map[y][x] == ' ' || field.map[y][x] == 'b');
+}
+function canO(field, o) {
+    return (field.map[o.y][o.x] == ' ' || field.map[o.y][o.x] == 'b');
+}
+
 function onTick(field) {
-	if (field.me.x == field.bonus.x) {
-	    return (field.me.y < field.bonus.y ? DOWN : UP);
-	} else if (field.me.y == field.bonus.y) {
-	    return (field.me.x < field.bonus.x ? RIGHT : LEFT);
-	} else
-	    return field.me.direction;
+    let M = matrix(field.width, field.height, -1);
+    let cells = [], i = 0, nx, ny;
+    cells.push(field.me);
+    while (cells.length > 0) {
+        let f = false, ncells = [];
+        if (i > 15) break;
+        for (let cell of cells) {
+            M[cell.y][cell.x] = i;
+            //ctx.fillText(i, cell.x / field.width * canvas.width,
+             //               (cell.y + 0.25) / field.height * canvas.height);
+            if (cell.x == field.bonus.x &&
+                cell.y == field.bonus.y) {
+                f = true;
+                break;
+            }
+                
+            // up
+            ny = cell.y == 0 ? (field.height-1) : cell.y-1;
+            if (M[ny][cell.x] == -1 && can(field, cell.x, ny))
+                ncells.push({x: cell.x, y: ny});
+            // down
+            ny = cell.y == (field.height-1) ? 0 : cell.y+1;
+            if (M[ny][cell.x] == -1 && can(field, cell.x, ny))
+                ncells.push({x: cell.x, y: ny});
+            // left
+            nx = cell.x == 0 ? (field.width-1) : cell.x-1;
+            if (M[cell.y][nx] == -1 && can(field, nx, cell.y))
+                ncells.push({x: nx, y: cell.y});
+            // right
+            nx = cell.x == (field.width-1) ? 0 : cell.x+1;
+            if (M[cell.y][nx] == -1 && can(field, nx, cell.y))
+                ncells.push({x: nx, y: cell.y});
+        }
+        if (f)
+            break;
+        cells = ncells;
+        i++;
+    }
+    
+    let dist = M[field.bonus.y][field.bonus.x];
+    if (dist == -1) {
+        if (canO(field, move(field.me, UP, field)))
+            return UP;
+        if (canO(field, move(field.me, DOWN, field)))
+            return DOWN;
+        if (canO(field, move(field.me, LEFT, field)))
+            return LEFT;
+        if (canO(field, move(field.me, RIGHT, field)))
+            return RIGHT;
+    }
+    
+    let path = [], x = field.bonus.x, y = field.bonus.y, d;
+    i = dist;
+    while (!(x == field.me.x && y == field.me.y)) {
+        path.push({x, y});
+        
+        // up
+        ny = y == 0 ? (field.height-1) : y-1;
+        if (M[ny][x] == i-1) {
+            y = ny; i--;
+            d = DOWN;
+            continue;
+        }
+        
+        // down
+        ny = y == (field.height-1) ? 0 : y+1;
+        if (M[ny][x] == i-1) {
+            y = ny; i--;
+            d = UP;
+            continue;
+        }
+            
+        // left
+        nx = x == 0 ? (field.width-1) : x-1;
+        if (M[y][nx] == i-1) {
+            x = nx; i--;
+            d = RIGHT;
+            continue;
+        }  
+        
+        // right
+        nx = x == (field.width-1) ? 0 : x+1;
+        if (M[y][nx] == i-1) {
+            x = nx; i--;
+            d = LEFT;
+            continue;
+        }
+        
+        break;
+    }
+    
+    return d;
 };

@@ -43,7 +43,7 @@ function drawPlayer(canvas, ctx, player, field) {
 		Y = Math.ceil(y / field.height * canvas.height),
 		S = Math.ceil(canvas.width / field.width);
 	let L = S * 0.1,
-		F = S * 0.5;
+		F = S * 0.75;
 	ctx.lineWidth = L;
 	ctx.strokeStyle = 'rgba(255,255,255,0.2)';
 	// ctx.strokeRect(X+L/2, Y+L/2, S-L, S-L);
@@ -60,6 +60,12 @@ function drawPlayer(canvas, ctx, player, field) {
 	ctx.strokeText(player.username, 
 				 pingPong(X+S/2 - width / 2, canvas.width), 
 				 pingPong(Y - S*0.1, canvas.height));
+
+	ctx.fillStyle = '#FFFFFF';
+	ctx.font = '700 ' + (S*0.6) + 'px \'Source Code Pro\'';
+	let nwidth = ctx.measureText(player.length).width;
+	ctx.fillText(player.length,
+				 X+S/2-nwidth/2, Y+S*0.7);
 }
 
 function pingPong(x, len) {
