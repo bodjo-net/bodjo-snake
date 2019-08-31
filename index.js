@@ -8,7 +8,7 @@ const LEFT = 3;
 
 const MIN_LENGTH = 3;
 
-const TPS = 5;
+const TPS = 7;
 let mapString = require('fs').readFileSync('map.txt').toString();
 
 if (mapString[0] == '\n')
@@ -77,6 +77,9 @@ function tick() {
 }
 tick();
 
+bodjo.on('connect', socket => {
+	socket.emit('map', map);
+});
 bodjo.on('player-connect', (player) => {
 	let username = player.username,
 		id = player.id,
@@ -85,7 +88,6 @@ bodjo.on('player-connect', (player) => {
 	if (typeof bodjo.scoreboard.get(username) === 'undefined')
 		bodjo.scoreboard.push(username, 0);
 
-	player.emit('map', map);
 
 	player.on('join', () => {
 		if (playing)

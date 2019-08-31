@@ -1,8 +1,6 @@
-bodjo.on('render', field => {
-	if (aspectRatio != (field.width / field.height))
-		resizeCanvas(field.width / field.height);
+bodjo.render = function (canvas, ctx, resizeCanvas, field) {
+	resizeCanvas(field.width / field.height);
 
-	let ctx = canvas.getContext('2d');
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	for (let x = 0; x < field.width; ++x) {
 		for (let y = 0; y < field.height; ++y) {
@@ -12,7 +10,7 @@ bodjo.on('render', field => {
 
 	for (let player of field.players)
 		drawPlayer(canvas, ctx, player, field);
-});
+}
 
 const colors = [
 	// 700 300
@@ -55,10 +53,10 @@ function drawPlayer(canvas, ctx, player, field) {
 	let width = ctx.measureText(player.username).width;
 
 	ctx.fillText(player.username, 
-				 pingPong(X+S/2 - width / 2, canvas.width), 
+				 pingPong(X+S/2, canvas.width) - width / 2, 
 				 pingPong(Y - S*0.1, canvas.height));
 	ctx.strokeText(player.username, 
-				 pingPong(X+S/2 - width / 2, canvas.width), 
+				 pingPong(X+S/2, canvas.width) - width / 2, 
 				 pingPong(Y - S*0.1, canvas.height));
 
 	ctx.fillStyle = '#FFFFFF';

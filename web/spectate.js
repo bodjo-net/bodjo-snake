@@ -13,80 +13,8 @@ bodjo.on('connect', socket => {
 	});
 
 	socket.on('field', (data) => {
-		let field = parseField(data, map);
-		window.lastField = field;
-		bodjo.callRender(field);
-
-		if (playing && field.me)
-			tick(field);
+		bodjo.callRender('', parseField(data, map));
 	});
-
-	socket.on('disconnect', () => {
-		playing = false;
-		bodjo.getControl('play').setActive(false);
-	});
-
-	let onTick = null;
-	function compile() {
-		try {
-			onTick = null;
-			onTick = new Function(bodjo.editor.getValue())();
-			if (typeof onTick !== 'function') {
-				bodjo.showError('code should return function');
-				return false;
-			}
-			return true;
-		} catch (e) {
-			bodjo.showError(e);
-			return false;
-		}
-	}
-	function tick(field) {
-		if (typeof onTick !== 'function') {
-			if (!compile()) {
-				stop();
-				return;
-			}
-		}
-
-		let result;
-		try {
-			result = onTick(field)
-		} catch (e) {
-			bodjo.showError(e);
-			stop();
-			return;
-		}
-
-		if (!Number.isInteger(result) ||
-			result < 0 || result > 4) {
-			bodjo.showError('function should return an integer in range [0, 3] \n(');
-			stop();
-			return;
-		}
-
-		socket.emit('turn', result);
-	}
-
-	function start() {
-		if (playing) return;
-		playing = true;
-		bodjo.getControl('play').setActive(true);
-		compile();
-		socket.emit('join');
-	}
-
-	function stop() {
-		if (!playing) return;
-		playing = false;
-		bodjo.getControl('play').setActive(false);
-		socket.emit('leave');
-	}
-
-	bodjo.controls = [
-		Button('play', start),
-		Button('pause', stop)
-	];
 });
 
 bodjo.on('scoreboard', (scoreboard) => {
