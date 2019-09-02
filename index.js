@@ -219,7 +219,8 @@ function can(o) {
 	if (map[y][x] == '#')
 		return false;
 	for (let id in players)
-		if (players[id].snake.indexOf(x+y*width) >= 0)
+		if (players[id].playing &&
+			players[id].snake.indexOf(x+y*width) >= 0)
 			return false;
 	return true;
 }
