@@ -1,4 +1,4 @@
-bodjo.render = function (canvas, ctx, resizeCanvas, field) {
+bodjo.render = function (canvas, ctx, resizeCanvas, dataPushed, field) {
 	resizeCanvas(field.width / field.height);
 
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
