@@ -10,6 +10,34 @@ bodjo.render = function (canvas, ctx, resizeCanvas, dataPushed, field) {
 
 	for (let player of field.players)
 		drawPlayer(canvas, ctx, player, field);
+
+	if (typeof field.debug !== 'undefined') {
+		let fontsize = (Math.ceil(canvas.width/field.width)*0.6);
+		ctx.font = '700 ' + fontsize + 'px \'Source Code Pro\'';
+		for (let d = 0; d < field.debug.length; ++d) {
+			let D = field.debug[d];
+			switch (D.type) {
+				case 'text':
+					ctx.fillStyle = D.color||'#FFFFFF';
+					// ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+					// ctx.lineWidth = fontsize*0.05;
+					let width = ctx.measureText(D.text).width;
+					ctx.fillText(D.text, (D.x+0.5) / field.width * canvas.width - width/2,
+										 (D.y+1) / field.height * canvas.height - fontsize/2);
+					// ctx.strokeText(D.text, (D.x+0.5) / field.width * canvas.width - width/2,
+										 // (D.y+1) / field.height * canvas.height - fontsize/2);
+					break;
+				case 'rect':
+					ctx.strokeStyle = D.color||'#FF0000';
+					ctx.lineWidth = canvas.width / field.width * 0.075;
+					ctx.strokeRect(D.x / field.width * canvas.width,
+								   D.y / field.height * canvas.height,
+								   canvas.width / field.width,
+								   canvas.height / field.height);
+					break;
+			}
+		}
+	}
 }
 
 const colors = [
