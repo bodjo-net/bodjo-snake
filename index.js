@@ -8,7 +8,7 @@ const LEFT = 3;
 
 const MIN_LENGTH = 3;
 
-const TPS = 7;
+const TPS = 5;
 let mapString = require('fs').readFileSync('map.txt').toString();
 
 if (mapString[0] == '\n')

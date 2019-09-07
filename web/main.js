@@ -1,6 +1,6 @@
 let width, height;
 let map = null;
-
+let lastField = null;
 bodjo.on('connect', socket => {
 	let playing = false;
 
@@ -14,11 +14,10 @@ bodjo.on('connect', socket => {
 
 	socket.on('field', (data) => {
 		let field = parseField(data, map);
-		window.lastField = field;
-		bodjo.callRender(field);
-
+		window.lastField = lastField = field;
 		if (playing && field.me)
-			tick(field);
+			tick(lastField);
+		bodjo.callRender(lastField);
 	});
 
 	socket.on('disconnect', () => {
@@ -70,9 +69,10 @@ bodjo.on('connect', socket => {
 
 	function start() {
 		if (playing) return;
+		if (!compile())
+			return;
 		playing = true;
 		bodjo.getControl('play').setActive(true);
-		compile();
 		socket.emit('join');
 	}
 
@@ -99,7 +99,24 @@ bodjo.on('scoreboard', (scoreboard) => {
 	);
 });
 
-
+let text = window.text = function (x, y, _text, color) {
+	if (lastField != null) {
+		if (typeof lastField.debug === 'undefined')
+			lastField.debug = [];
+		lastField.debug.push({
+			type: 'text', x, y, text: _text, color: color
+		})
+	}
+}
+let rect = window.rect = function (x, y, color) {
+	if (lastField != null) {
+		if (typeof lastField.debug === 'undefined')
+			lastField.debug = [];
+		lastField.debug.push({
+			type: 'rect', x, y, color: color
+		})
+	}
+}
 function parseField(data, map) {
 	let d = new DataView(data);
 
