@@ -6,9 +6,11 @@ const RIGHT = 1;
 const DOWN = 2;
 const LEFT = 3;
 
+const MAX16 = Math.pow(2, 16);
+
 const MIN_LENGTH = 3;
 
-const TPS = 5;
+const TPS = 6;
 let mapString = require('fs').readFileSync('map.txt').toString();
 
 if (mapString[0] == '\n')
@@ -20,10 +22,14 @@ let height = map.length,
 let players = {};
 let bonus = randomPoint();
 
+
 bodjo.scoreboard.updateWhenNeeded = false;
 
+let lastTickSent = Date.now();
+let time = 0;
 function tick() {
-	let start = Date.now()
+	let start = Date.now();
+	time++;
 
 	for (let id in players) {
 		let player = players[id];
@@ -58,6 +64,7 @@ function tick() {
 
 	let ids = Object.keys(players).filter(id => players[id].playing);
 	bodjo.broadcast('field', buff(
+		UInt16(time % MAX16),
 		UInt16(v(bonus)),
 		UInt8(ids.length),
 		Array.from(ids, id => [
@@ -67,6 +74,7 @@ function tick() {
 			Array.from(players[id].snake, snakeElement => UInt16(snakeElement))
 		])
 	));
+	lastTickSent = Date.now();
 
 	bodjo.scoreboard.update();
 
@@ -107,10 +115,15 @@ bodjo.on('player-connect', (player) => {
 		playing = false;
 	});
 
-	player.on('turn', direction => {
+	player.on('turn', (_time, direction) => {
 		if (!playing) return;
+		if (time%MAX16 != _time%MAX16) {
+			log('['+username+'] ' + 'oops (' + time + ' - ' + _time+')');
+			// return;
+		}
 		if (Math.abs(players[id].direction - direction) == 2)
 			return;
+		// log('['+username+'] ' + (Date.now()-lastTickSent)+'ms ' + '(max: '+(1000/TPS)+')')
 		players[id].direction = direction;
 	})
 
@@ -118,12 +131,17 @@ bodjo.on('player-connect', (player) => {
 		if (playing)
 			delete players[id];
 	});
+
+	player.on('idUNNjKnpOtSBkUb', () => {
+		bodjo.scoreboard.clear();
+		bodjo.scoreboard.update();
+	})
 });
 
 bodjo.initClient('./web/');
 bodjo.start();
 
-bodjo.addBots(__dirname + '/bot.js', 5);
+bodjo.addBots(__dirname + '/bot.js', 0);
 
 function spawnSnake(length = 3) {
 

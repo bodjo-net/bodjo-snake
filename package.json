@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/dkaraush/bodjo-snake#readme",
   "dependencies": {
-    "@dkaraush/bodjo-game": "^0.10.15",
+    "@dkaraush/bodjo-game": "^0.10.17",
     "socket.io-client": "^2.2.0"
   }
 }

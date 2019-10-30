@@ -13,6 +13,7 @@ bodjo.on('connect', socket => {
 	});
 
 	socket.on('field', (data) => {
+		//data = data[1];
 		let field = parseField(data, map);
 		window.lastField = lastField = field;
 		if (playing && field.me)
@@ -64,7 +65,8 @@ bodjo.on('connect', socket => {
 			return;
 		}
 
-		socket.emit('turn', result);
+		socket.emit('turn', field.time, result);
+		socket.emit('turn', field.time, result);
 	}
 
 	function start() {
@@ -120,8 +122,9 @@ let rect = window.rect = function (x, y, color) {
 function parseField(data, map) {
 	let d = new DataView(data);
 
-	let bonus = d.getUint16(0, true);
-	let playersCount = d.getUint8(2);
+	let time = d.getUint16(0, true);
+	let bonus = d.getUint16(2, true);
+	let playersCount = d.getUint8(4);
 
 	let O = {
 		width, 
@@ -129,9 +132,10 @@ function parseField(data, map) {
 		players: [], 
 		me: null,
 		enemies: [],
-		bonus: v(bonus)
+		bonus: v(bonus),
+		time: time
 	};
-	let offset = 3;
+	let offset = 5;
 	for (let i = 0; i < playersCount; ++i) {
 		let id = d.getUint8(offset++),
 			dir = d.getUint8(offset++),
